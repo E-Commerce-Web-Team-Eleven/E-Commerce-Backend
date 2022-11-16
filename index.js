@@ -14,7 +14,7 @@ var client_id = "YOUR_CLIENT_ID";
 var client_secret = "YOUR_CLIENT_SECRET";
 
 // 기본 속성 설정
-app.set("port", process.env.PORT || 8080);
+app.set("port", process.env.PORT || 5000);
 
 // body-parser
 var bodyParser = require("body-parser");
@@ -41,10 +41,6 @@ var corsOptions = {
 
 router.post("/food", upload, async (req, res) => {
   res.setHeader("Access-Control-Allow-origin", "*");
-  //res.header("Access-Control-Allow-Origin", "http://localhost:3000/");
-
-  // 가져온 이미지를 저장해주면 됨
-
   // 1. child-process모듈의 spawn 취득
   const spawn = require("child_process").spawn;
 
@@ -56,44 +52,15 @@ router.post("/food", upload, async (req, res) => {
 
   // 2. spawn을 통해 "python 파이썬파일.py" 명령어 실행
   const result = spawn("python", ["foodIdentifier.py", req.file.filename]);
-  console.log(req.file);
   // 3. stdout의 'data'이벤트리스너로 실행결과를 받는다.
   result.stdout.on("data", function (chunk, error) {
     if (error) console.log("에러발생 ::: ", error);
     var textChunk = chunk.toString("utf8");
-    //console.log("return value ::: " + textChunk);
     resultNum++;
     if (resultNum == 3) {
-      console.log("return real value ::: " + textChunk);
-
       return res.status(200).json({ foodName: textChunk });
     }
   });
-
-  // 4. 에러 발생 시, stderr의 'data'이벤트리스너로 실행결과를 받는다.
-  //result.stderr.on("data", function (data) {
-  //  flag = true;
-  //});
-  /*    if (!flag) {
-      return res.status(200).json({ foodName: req.file.filename });
-    } else {
-      return res.json({ message: "400 Bad Request" });
-    } */
-  /*
-  var options = {
-    mode: "json",
-    pythonPath: "",
-    pythonOptions: ["-u"],
-    scriptPath: "",
-    args: [req.file.filename],
-  };
-
-  PythonShell.run("foodIdentifier.py", options, function (err, results) {
-    if (err) throw err;
-    console.log(results);
-    res.send(results);
-  });
-  */
 });
 
 const translate = async (name) => {
@@ -186,10 +153,8 @@ router.get("/allIntro", (req, res) => {
 });
 
 router.get("/foodIdList", (req, res) => {
-  //console.log(req.query.IRDNT_NM);
   getFoodIdList(req.query.IRDNT_NM).then((response) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
-    //console.log("/foodIdList", response.data);
     return res
       .status(200)
       .json({ result: response.data.Grid_20150827000000000227_1 });
@@ -197,10 +162,8 @@ router.get("/foodIdList", (req, res) => {
 });
 
 router.get("/recipe", (req, res) => {
-  //(req.query.RECIPE_ID);
   getRecipeById(req.query.RECIPE_ID).then((response) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
-    //console.log("/recipe", response.data);
     return res
       .status(200)
       .json({ result: response.data.Grid_20150827000000000228_1 });
@@ -208,10 +171,8 @@ router.get("/recipe", (req, res) => {
 });
 
 router.get("/ingredient", (req, res) => {
-  //console.log(req.query.RECIPE_ID);
   getIngredientById(req.query.RECIPE_ID).then((response) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
-    //console.log("/ingre", response.data);
     return res
       .status(200)
       .json({ result: response.data.Grid_20150827000000000227_1 });
